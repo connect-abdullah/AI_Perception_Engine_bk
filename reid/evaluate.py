@@ -23,19 +23,14 @@ import sys
 from dataclasses import dataclass, field
 from itertools import combinations
 from pathlib import Path
-from typing import Protocol
 
 import numpy as np
 
-from reid.embedder import Embedder
+from reid.embedder import Embedder, SupportsEmbed
 from reid.similarity import cosine_similarity
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 PERCENTILES = (1, 5, 25, 75, 95, 99)
-
-
-class SupportsEmbed(Protocol):
-    def embed(self, image) -> np.ndarray: ...
 
 
 @dataclass(frozen=True)

@@ -7,6 +7,7 @@ import os
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
 
 import numpy as np
 import torch
@@ -75,6 +76,12 @@ def ensure_weights(spec: ModelSpec = DEFAULT_MODEL, weights_dir: Path | None = N
 
 
 ImageInput = str | os.PathLike | np.ndarray
+
+
+class SupportsEmbed(Protocol):
+    """Anything that maps one person image to a 1-D embedding. `Embedder` satisfies this."""
+
+    def embed(self, image) -> np.ndarray: ...
 
 
 def _load_rgb(image: ImageInput) -> Image.Image:
