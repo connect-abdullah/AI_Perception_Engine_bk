@@ -3,3 +3,5 @@ numpy>=1.26
 # CPU wheels: --index-url https://download.pytorch.org/whl/cpu
 torch==2.14.1
 torchvision==0.29.1
+supervision==0.30.9
+scipy==1.17.1
