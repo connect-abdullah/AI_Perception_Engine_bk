@@ -1,0 +1,33 @@
+# Docker Compose – local Postgres for development only.
+# Supabase is the target; this container is provided so the app can be run
+# and schema-tested without a Supabase account.
+#
+# Credentials are read from the shell environment or a .env file.
+# Do NOT start this container when targeting Supabase.
+#
+# Usage (local Postgres only):
+#   docker compose up -d
+#   # then set DATABASE_URL / DIRECT_URL in .env to:
+#   #   postgresql+psycopg://perception:perception@localhost:5432/perception?sslmode=disable
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-perception}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-perception}
+      POSTGRES_DB:       ${POSTGRES_DB:-perception}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # Optionally seed the schema on first start:
+      # - ./sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-perception}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data:
