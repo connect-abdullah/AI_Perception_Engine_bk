@@ -205,8 +205,9 @@ So, a simple sequential integer is sufficient for the primary key.
 
 ### Why is an integer better here?
 
-
-
 ### Smaller index
 
 An integer ID uses 8 bytes with BIGINT, whereas a UUID uses 16 bytes. With millions of observations, that difference adds up.
+
+![Database schema](public/Schema.jpeg)
+  
