@@ -15,8 +15,10 @@ infrastructure only; they are not cleared for commercial or production use.
 
 from __future__ import annotations
 
+import hashlib
 import math
 from dataclasses import dataclass
+from functools import lru_cache
 from numbers import Real
 from pathlib import Path
 from typing import Protocol
@@ -88,6 +90,23 @@ def select_person_detections(boxes_xyxy, labels, scores, person_label: int, scor
     return detections
 
 
+@lru_cache(maxsize=None)
+def _file_sha256(path: str, size: int, mtime_ns: int) -> str:
+    """SHA-256 of a file; cached per (path, size, mtime) so it is read once per process."""
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        while chunk := f.read(1 << 20):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _checkpoint_sha256(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    stat = path.stat()
+    return _file_sha256(str(path), stat.st_size, stat.st_mtime_ns)
+
+
 class TorchvisionPersonDetector:
     """Faster R-CNN ResNet-50 FPN v2 (torchvision, COCO weights), person class only.
 
@@ -99,7 +118,8 @@ class TorchvisionPersonDetector:
     the frame passed in.
 
     Weights are fetched through the torchvision weights API into the torch hub cache
-    (downloaded on first use).
+    (downloaded on first use). `provenance` names the checkpoint file and its SHA-256 but
+    never its local path, so it can be exported without machine-specific details.
     """
 
     def __init__(self, score_threshold: float, *, device: str = "cpu"):
@@ -121,7 +141,9 @@ class TorchvisionPersonDetector:
             "detector": "torchvision.models.detection.fasterrcnn_resnet50_fpn_v2",
             "weights": f"{type(self.weights).__name__}.{self.weights.name}",
             "weights_url": self.weights.url,
-            "weights_cache_path": str(Path(torch.hub.get_dir()) / "checkpoints" / Path(self.weights.url).name),
+            "weights_file": Path(self.weights.url).name,
+            # SHA-256 of the checkpoint file in the local cache (the file the model loads); the path itself is not recorded
+            "weights_sha256": _checkpoint_sha256(Path(torch.hub.get_dir()) / "checkpoints" / Path(self.weights.url).name),
             "training_data": "COCO (train2017); development/PoC use only, not commercially cleared",
             "torch_version": torch.__version__,
             "torchvision_version": torchvision.__version__,

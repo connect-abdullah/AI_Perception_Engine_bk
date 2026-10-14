@@ -36,9 +36,11 @@ All paths inside the files are relative to `<run_dir>` and use `/` separators.
 |---|---|---|
 | `video_start_time` | string or null | Wall-clock time of source frame 0, ISO-8601 **with timezone offset**. Null if unknown. |
 | `width`, `height` | integer > 0 | Size in pixels of the decoded source frames that bboxes refer to. |
-| `frame_count` | integer or null | Number of source frames, if known. |
+| `frame_count` | integer or null | Number of source frames, if known (may be the container's estimate). |
+| `processing` | object | How the video was processed, e.g. `stride`, `crop_every`, the tracker's update rate (`fps / stride`) and the number of processed frames. |
 | `timestamp_method` | string | How `timestamp_seconds` was derived, e.g. `"frame_index/fps"` (assumes constant frame rate) or `"container_pts"`. |
 | `producer` | object | Free-form producer, detector and tracker metadata (names, versions, parameters). For audit only; consumers must not change behaviour based on it. |
+| `num_observations` | integer | Number of lines in `observations.jsonl`. |
 | `tracks` | array | Per-track summary, see below. Every value can be derived from `observations.jsonl`. |
 
 Per-track summary entry:
@@ -57,6 +59,7 @@ Per-track summary entry:
 
 | Field | Type | Meaning |
 |---|---|---|
+| `source_video_id` | string | Same value as in the manifest. |
 | `local_track_id` | string | Tracker-assigned id. |
 | `frame_number` | integer ≥ 0 | 0-based source-video frame number. |
 | `timestamp_seconds` | number ≥ 0 | Seconds from the start of this video. |
@@ -89,6 +92,12 @@ Per-track summary entry:
 8. **No identity confidence belongs in this contract.** `detection_confidence` is a detector
    score that a box contains a person; it is not evidence about who the person is, and the
    consumer must not use it as such.
+
+## Completeness
+
+A run directory is complete only if `manifest.json` exists and no `_INCOMPLETE` file is
+present. Producers write `manifest.json` last. Consumers must not read a directory that
+fails this check; it may hold partial observations and crops from a failed run.
 
 ## Data handling
 

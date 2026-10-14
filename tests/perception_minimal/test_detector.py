@@ -5,7 +5,9 @@ torch hub cache; it never downloads.
 """
 
 import dataclasses
+import hashlib
 import math
+import re
 from pathlib import Path
 
 import numpy as np
@@ -324,6 +326,29 @@ def test_provenance_recorded(make_detector):
     assert p["torch_version"] == torch.__version__
     assert p["weights_url"].startswith("https://download.pytorch.org/models/")
     assert "not commercially cleared" in p["training_data"]
+    assert p["weights_file"] == "fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth"
+    assert "weights_cache_path" not in p
+
+
+def test_provenance_has_no_local_path(make_detector):
+    detector, _ = make_detector([], 0.5)
+    text = repr(detector.provenance)
+    for local in (str(Path.home()), torch.hub.get_dir(), Path(torch.hub.get_dir()).as_posix()):
+        assert local not in text
+    for value in detector.provenance.values():
+        if isinstance(value, str):
+            assert not Path(value).is_absolute() and not re.match(r"[A-Za-z]:[\/]", value)
+
+
+def test_weights_sha256_of_cached_file(make_detector):
+    detector, _ = make_detector([], 0.5)
+    digest = detector.provenance["weights_sha256"]
+    cached = Path(torch.hub.get_dir()) / "checkpoints" / "fasterrcnn_resnet50_fpn_v2_coco-dd69338a.pth"
+    if cached.is_file():
+        assert digest == hashlib.sha256(cached.read_bytes()).hexdigest()
+        assert digest.startswith("dd69338a")  # torchvision's filename hash prefix
+    else:
+        assert digest is None  # only possible with an injected model; the real model loads this file
 
 
 # --------------------------------------------------------------------------- real model (cached weights only)
