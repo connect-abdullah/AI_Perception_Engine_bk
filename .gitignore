@@ -34,3 +34,6 @@ alembic/versions/__pycache__/
 
 # macOS
 .DS_Store
+
+# Local ReID evaluation images (never commit)
+eval_data/
