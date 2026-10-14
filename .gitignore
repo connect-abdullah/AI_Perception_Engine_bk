@@ -37,3 +37,6 @@ alembic/versions/__pycache__/
 
 # Local ReID evaluation images (never commit)
 eval_data/
+
+# Perception pipeline outputs (real-person crops; never commit)
+perception_runs/
