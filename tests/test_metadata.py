@@ -186,3 +186,23 @@ def test_observations_spatial_fields_optional(tables):
     for col in ("world_x", "world_y", "world_z", "room_id"):
         assert t.c[col].nullable, f"observations.{col} must be optional"
     assert _fk_ondelete(t, "room_id") == "SET NULL"
+
+
+# ── Migration c8d3e1f0a2b5: handoff join columns ──────────────────────────────
+
+def test_videos_source_video_id_nullable(tables):
+    """Nullable so camera rows registered before ingestion remain valid."""
+    assert tables["videos"].c["source_video_id"].nullable
+
+
+def test_videos_source_video_id_unique(tables):
+    """Two perception runs must not claim the same source_video_id."""
+    uq_names = {c.name for c in tables["videos"].constraints if isinstance(c, sa.UniqueConstraint)}
+    assert "uq_videos_source_video_id" in uq_names, (
+        "videos.source_video_id must have a unique constraint"
+    )
+
+
+def test_observations_crop_path_nullable(tables):
+    """crop_path is optional: activity-only observations have no crop."""
+    assert tables["observations"].c["crop_path"].nullable

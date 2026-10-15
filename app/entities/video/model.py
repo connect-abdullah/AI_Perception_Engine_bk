@@ -52,6 +52,9 @@ class Video(Base):
         sa.Index("ix_videos_camera_id", "camera_id"),
         # Index on video_start_time for time-range queries.
         sa.Index("ix_videos_start_time", "video_start_time"),
+        # Named unique + index so the ingestion layer can look up by handoff id.
+        sa.UniqueConstraint("source_video_id", name="uq_videos_source_video_id"),
+        sa.Index("ix_videos_source_video_id", "source_video_id"),
     )
 
     # ── Columns ───────────────────────────────────────────────────────────────
@@ -77,6 +80,12 @@ class Video(Base):
     status: Mapped[str] = mapped_column(
         sa.String(20), nullable=False, server_default="uploaded"
     )
+    # Stable string identifier written by the perception producer (e.g.
+    # "sha256:<hex>").  Matches the source_video_id field in manifest.json and
+    # observations.jsonl; nullable so camera-registration rows stay valid before
+    # a run is ingested.  Named unique constraint for lookups and migration
+    # introspection.
+    source_video_id: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
     source: Mapped[str] = mapped_column(
         sa.String(20), nullable=False, server_default="cv", default="cv"
     )

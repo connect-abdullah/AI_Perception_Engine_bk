@@ -1,0 +1,61 @@
+pair,camera,track,obs,frames,visual_finding,in_review_window,class
+P01,G330,383,10,4580-4670,red top/camo trousers throughout,stable,stable
+P01,G299,345,6,4490-4620,striped coat 4490-4540 -> red top/camo 4620,yes,switch
+P02,G330,396,8,4660-4730,blue tracksuit throughout,stable,stable
+P02,G299,360,7,4730-4790,blue tracksuit throughout,stable,stable
+P03,G330,769,102,7920-9000,blue tracksuit -> navy hoodie/white cap (~8140) -> red top/camo (~8250-8300) -> other at 8870 -> red top again,yes (8230-8300),switch (multiple)
+P03,G299,759,21,8320-8550,long-haired person in grey jacket throughout,stable,stable
+P04,G330,749,4,7720-7750,blue hoodie (7720) -> red/camo person (7750),yes,switch (very short track)
+P04,G299,686,117,7710-8880,beige -> light-blue sweater (7770) -> navy hoodie/cap (7890) -> dark clothing (7950-8350) -> red top/camo (8410-8880),yes (7710->7770),switch (multiple)
+P05,G330,864,8,8800-8870,beige T-shirt 8800-8860 -> blue hoodie 8870,yes (at people crossing),switch (crossing)
+P05,G299,808,17,8840-9000,beige T-shirt 8840 -> grey jacket 8870-8990 -> other 9000,yes (at people crossing),switch (crossing)
+P06,G330,539,45,6060-6560,light jacket/dark+khaki -> navy hoodie/cap (~6240) -> red top (6330) -> navy (6360) -> dark clothing (6390-6560),yes (~6240),switch (multiple)
+P06,G299,375,166,4860-6560,long-haired person with tote bag 4860-6240 -> red top (6330) -> navy hoodie/cap (6420) -> other (6560),yes (~6300),switch
+P07,G330,518,53,5800-6430,at least 6 different people (khaki/dark; navy hoodie; white jacket with bag; ...),yes,switch (multiple)
+P07,G299,520,12,6320-6460,plaid shirt -> blue tracksuit (6360-6390) -> camouflage jacket (6440-6460),yes,switch (multiple)
+P08,G330,824,3,8410-8430,dark person partly occluded by a person in blue; 0.7 s,n/a,short/ambiguous
+P08,G299,748,35,8190-8550,first detection (8190) blue hoodie -> beige T-shirt man 8220-8550,no (8190 outside window),wrong first detection
+P09,G330,195,1,2740,single low-resolution detection,n/a,single detection
+P09,G299,215,2,2730-2740,two low-resolution detections,n/a,short/ambiguous
+P10,G330,661,37,6990-7380,grey sweater -> white jacket with bag (~7080) -> dark (7310) -> other (7380),yes,switch (multiple)
+P10,G299,623,17,7180-7360,plaid shirt 7180-7290 -> other person (7320) -> dark person with cart (7350-7360),yes,switch (multiple)
+P11,G330,780,2,8000-8030,two partial low-resolution detections,n/a,short/ambiguous
+P11,G299,728,3,8010-8030,three partial dark detections,n/a,short/ambiguous
+P12,G330,118,67,1880-2580,dark coat -> grey hood/dark coat (1940-2180) -> person with handbag (2240-2300) -> plaid shirt (2360-2580; blue tracksuit at 2550),yes (~2330),switch (multiple)
+P12,G299,192,1,2390,single detection,n/a,single detection
+P13,G330,672,5,7080-7130,dark/bald person -> blue jacket at last detection (7130),yes (probable),switch (probable)
+P13,G299,610,6,7070-7130,dark low-resolution person,stable (low resolution),stable/ambiguous
+P14,G330,816,11,8350-8520,bald person in black throughout,stable,stable
+P14,G299,391,392,5020-9000,black jacket (paper in back pocket) 5020-8390 -> maroon top 8420-9000,yes (8390-8420),switch
+P15,G330,502,4,5660-5690,dark hoodie (4 low-resolution detections),stable,stable/ambiguous
+P15,G299,412,42,5250-5660,blue tracksuit throughout (brief occluder at 5340),stable,stable
+P16,G330,625,71,6740-7510,dark clothing -> navy hoodie/cap (~7010; white jacket at 7040) -> red top/camo (7500),yes (~7000),switch (multiple)
+P16,G299,580,26,6800-7050,grey jacket man -> white jacket with bag (7010) -> navy hoodie/cap (7040),yes (crossing ~7010-7040),switch (crossing)
+P17,G330,595,26,6520-6780,plaid -> dark with beanie (6590-6740) -> blue (6770-6780),yes (~6770),switch (multiple)
+P17,G299,578,51,6750-7270,navy hoodie/cap 6750-7020 -> white jacket with bag 7050-7270,no (outside window),switch (crossing; mirrors T580)
+P18,G330,73,72,1180-2290,seated person with white cap and maroon top throughout (37 s),stable,stable
+P18,G299,150,4,1990-2060,two low-resolution crops,n/a,short/ambiguous
+P19,G330,211,24,2970-3230,grey sweats (2970) -> black T-shirt (3020-3110) -> grey hoodie (3150-3230),yes (~3000),switch (multiple)
+P19,G299,223,12,2890-3000,grey/white sweatshirt throughout,stable,stable
+P20,G330,794,31,8120-8420,woman in navy 8120-8360 -> grey-sweater man 8390-8420,yes (last sampled instant),switch
+P20,G299,736,36,8070-8430,woman in navy 8070-8370; cluttered/ambiguous 8410-8430,probable at end,stable then ambiguous
+P21,G330,111,82,1780-2600,first detection plaid/striped (1780) -> brown coat 1810-2410 -> striped shirt (2480-2570) -> other (2600),first detection yes; main switch outside window,wrong first detection + switch outside window
+P21,G299,119,73,1570-2290,brown coat throughout,stable,stable
+P22,G330,757,1,7790,single detection (green jacket),n/a,single detection
+P22,G299,644,55,7320-7870,striped sweater throughout,stable,stable
+P23,G330,769,102,7920-9000,see P03 (red top/camo throughout this window),no (switches outside window),switch outside window
+P23,G299,777,12,8510-8620,dark jacket/jeans throughout,stable,stable
+P24,G330,42,1,610,single seated detection,n/a,single detection
+P24,G299,35,63,360-1030,grey hoodie+khaki -> grey sweatsuit (430-800) -> black clothing (850-940) -> grey hoodie+khaki (980-1030),no (window inside the grey sweatsuit segment),switch outside window
+P25,G330,873,1,8900,single low-resolution detection,n/a,single detection
+P25,G299,816,3,8910-8970,low-resolution,n/a,short/ambiguous
+P26,G330,202,13,2820-3030,seated person (low resolution),stable (low resolution),stable/ambiguous
+P26,G299,213,11,2710-2810,grey T-shirt person throughout,stable,stable
+P27,G330,307,9,3860-3950,denim jacket -> long-haired person (3930-3950),yes,switch
+P27,G299,293,5,3840-3880,red jacket -> denim jacket (3880),yes,switch
+P28,G330,199,9,2810-2890,red top/camo throughout,stable,stable
+P28,G299,214,17,2710-2890,blue tracksuit -> red top/camo (2820-2850) -> dark-clothed person (2880-2890); each sampled instant a different person,yes,switch (multiple)
+P29,G330,122,170,1910-3670,black jacket + yellow cap 2020-~3500 (sits ~2900; neighbour in crop) -> different person 3580-3670,no (window stable),switch outside window
+P29,G299,156,64,2050-2680,black jacket + yellow cap throughout,stable,stable
+P30,G330,375,58,4490-5270,at least 5 different people (dark; long hair; grey jacket; logo hoodie; fur coat; black jacket),yes,switch (multiple)
+P30,G299,390,9,5000-5140,4 crops of different/occluded people,yes,switch/ambiguous

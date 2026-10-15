@@ -16,6 +16,7 @@ from app.config import settings
 from app.core.logging import get_logger
 from app.core.response import fail, ok
 from app.db.session import get_db
+from app.routes import api_router
 
 logger = get_logger(__name__)
 
@@ -24,6 +25,8 @@ app = FastAPI(
     version=settings.app_version,
     description="AI Perception Engine – video-first security PoC",
 )
+
+app.include_router(api_router)
 
 
 @app.get("/")

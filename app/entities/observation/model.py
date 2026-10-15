@@ -90,5 +90,10 @@ class Observation(Base):
         nullable=True,
     )
 
+    # Relative path of the crop PNG saved by the perception producer, matching
+    # crop_path in observations.jsonl.  Nullable: observations that have no
+    # crop (e.g. activity-only records) are valid without it.
+    crop_path: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
+
     # ── Relationships ─────────────────────────────────────────────────────────
     track: Mapped["Track"] = relationship("Track", back_populates="observations")
