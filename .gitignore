@@ -40,3 +40,9 @@ eval_data/
 
 # Perception pipeline outputs (real-person crops; never commit)
 perception_runs/
+
+# Local helpers / outputs
+setup_windows.bat
+setup_log.txt
+activity_log.csv
+*.pt

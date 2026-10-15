@@ -161,3 +161,28 @@ def test_observations_track_id_cascade(tables):
 
 def test_events_track_id_set_null(tables):
     assert _fk_ondelete(tables["events"], "track_id") == "SET NULL"
+
+
+# ── Migration b7e1c0d2f3a4: identity decision, source, spatial ───────────────
+
+def test_tracks_identity_fields_are_optional(tables):
+    t = tables["tracks"]
+    assert t.c["identity_status"].nullable, "unresolved tracks have no status yet"
+    assert t.c["identity_confidence"].nullable
+    assert not t.c["identity_meta"].nullable, "identity_meta defaults to {}"
+
+
+def test_tracks_identity_confidence_check(tables):
+    assert "ck_tracks_identity_confidence" in _check_names(tables["tracks"])
+
+
+def test_videos_source_column(tables):
+    assert not tables["videos"].c["source"].nullable
+    assert "ck_videos_source" in _check_names(tables["videos"])
+
+
+def test_observations_spatial_fields_optional(tables):
+    t = tables["observations"]
+    for col in ("world_x", "world_y", "world_z", "room_id"):
+        assert t.c[col].nullable, f"observations.{col} must be optional"
+    assert _fk_ondelete(t, "room_id") == "SET NULL"
