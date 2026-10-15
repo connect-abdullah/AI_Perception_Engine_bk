@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import app.db.base  # noqa: E402,F401  (registers all models; avoids circular import)
 from app.db.session import SessionLocal  # noqa: E402
 from app.entities.camera.model import Camera  # noqa: E402
 from app.entities.event.model import Event  # noqa: E402
@@ -151,7 +152,7 @@ try:
         timestamp=utc(hour=9, minute=1),
         room_id=room.id,
         confidence=0.95,
-        metadata={"entry_door": "main"},
+        event_meta={"entry_door": "main"},
     )
     db.add(event)
     db.flush()

@@ -40,6 +40,7 @@ class StateInterval(Base):
             name="ck_si_confidence",
         ),
         # Supports "all intervals for track T ordered by start_time".
+        sa.Index("ix_si_track_id", "track_id"),
         sa.Index("ix_si_track_start", "track_id", "start_time"),
     )
 
@@ -54,7 +55,6 @@ class StateInterval(Base):
         sa.Uuid(as_uuid=True),
         sa.ForeignKey("tracks.id", ondelete="CASCADE"),
         nullable=False,
-        index=True,
     )
     activity: Mapped[str] = mapped_column(sa.String(30), nullable=False)
     start_time: Mapped[datetime] = mapped_column(

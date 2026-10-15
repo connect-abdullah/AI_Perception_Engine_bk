@@ -40,6 +40,8 @@ class Video(Base):
         ),
         # Technical metadata must be positive when present.
         sa.CheckConstraint("fps IS NULL OR fps > 0", name="ck_videos_fps"),
+        # Real CV output vs synthetic simulator data – must stay distinguishable.
+        sa.CheckConstraint("source IN ('cv', 'simulated')", name="ck_videos_source"),
         sa.CheckConstraint("width IS NULL OR width > 0", name="ck_videos_width"),
         sa.CheckConstraint("height IS NULL OR height > 0", name="ck_videos_height"),
         sa.CheckConstraint(
@@ -74,6 +76,9 @@ class Video(Base):
     duration_seconds: Mapped[Optional[float]] = mapped_column(sa.Float, nullable=True)
     status: Mapped[str] = mapped_column(
         sa.String(20), nullable=False, server_default="uploaded"
+    )
+    source: Mapped[str] = mapped_column(
+        sa.String(20), nullable=False, server_default="cv", default="cv"
     )
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True), server_default=sa.func.now()

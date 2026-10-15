@@ -20,6 +20,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -46,6 +47,10 @@ class Track(Base):
         ),
         # Composite index for "all tracks for person P ordered by time".
         sa.Index("ix_tracks_person_start", "person_id", "start_time"),
+        sa.CheckConstraint(
+            "identity_confidence IS NULL OR identity_confidence BETWEEN 0.0 AND 1.0",
+            name="ck_tracks_identity_confidence",
+        ),
     )
 
     # ── Columns ───────────────────────────────────────────────────────────────
@@ -72,6 +77,15 @@ class Track(Base):
     )
     end_time: Mapped[Optional[datetime]] = mapped_column(
         sa.DateTime(timezone=True), nullable=True
+    )
+
+    # ── Identity decision (provisional – see migration b7e1c0d2f3a4) ──────────
+    # Open string, no CHECK: values like probable/uncertain/new may change.
+    identity_status: Mapped[Optional[str]] = mapped_column(sa.String(30), nullable=True)
+    identity_confidence: Mapped[Optional[float]] = mapped_column(sa.Float, nullable=True)
+    # Evolving evidence (candidates, scores, geometry verdict, model version …).
+    identity_meta: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default=sa.text("'{}'::jsonb"), default=dict
     )
 
     # ── Relationships ─────────────────────────────────────────────────────────
