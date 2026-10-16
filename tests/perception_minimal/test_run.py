@@ -241,7 +241,9 @@ def test_manifest_contents(video, tmp_path):
     assert producer["name"] == "perception_minimal"
     assert producer["score_threshold"] == 0.5
     assert producer["detector"] == {"class": "BlobDetector"}
-    assert producer["tracker"]["tracker"].endswith("ByteTrack")
+    assert producer["tracker"]["tracker"] == "RejectAndSplitPersonTracker"
+    assert producer["tracker"]["gate"] == "reject_and_split_hsv"
+    assert producer["tracker"]["inner"]["tracker"].endswith("ByteTrack")
     assert set(producer["packages"]) == {"numpy", "opencv-python-headless", "torch", "torchvision", "supervision", "scipy"}
     assert producer["packages"]["supervision"] == "0.30.9"
 
@@ -321,7 +323,7 @@ def test_malformed_detector_result(video, tmp_path):
 
 def test_malformed_tracker_result(video, tmp_path):
     class Bad:
-        def update(self, detections):
+        def update(self, detections, frame_bgr=None):
             from perception_minimal.tracker import TrackedDetection
             return [TrackedDetection("1", (W - 5, 0, 20, 20), 0.9)]  # outside the frame
 

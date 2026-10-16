@@ -29,7 +29,7 @@ from perception_minimal.export import (
     prepare_output_dir,
     sha256_video_id,
 )
-from perception_minimal.tracker import ByteTrackPersonTracker, PersonTracker
+from perception_minimal.tracker import PersonTracker, RejectAndSplitPersonTracker
 from perception_minimal.video import VideoReader
 
 PRODUCER = "perception_minimal"
@@ -57,7 +57,7 @@ def run_pipeline(
     source_video_id: str | None = None,
     video_start_time: str | None = None,
     overwrite: bool = False,
-    tracker_factory: Callable[[float], PersonTracker] = ByteTrackPersonTracker,
+    tracker_factory: Callable[[float], PersonTracker] = RejectAndSplitPersonTracker,
 ) -> dict:
     """Process one video into `out_dir`; return the manifest written there.
 
@@ -83,7 +83,7 @@ def run_pipeline(
             last_frame_number = None
             for frame in video.frames(stride):
                 detections = detector.detect(frame.frame_bgr)
-                tracked = tracker.update(detections)
+                tracked = tracker.update(detections, frame.frame_bgr)
                 writer.add_frame(frame.frame_number, frame.timestamp_seconds, frame.frame_bgr, tracked)
                 processed += 1
                 last_frame_number = frame.frame_number

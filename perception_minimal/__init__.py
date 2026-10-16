@@ -5,7 +5,12 @@ reid/ and app/; its output boundary is docs/reid_handoff_contract.md.
 """
 
 from perception_minimal.detector import PersonDetection, PersonDetector, TorchvisionPersonDetector
-from perception_minimal.tracker import ByteTrackPersonTracker, PersonTracker, TrackedDetection
+from perception_minimal.tracker import (
+    ByteTrackPersonTracker,
+    PersonTracker,
+    RejectAndSplitPersonTracker,
+    TrackedDetection,
+)
 from perception_minimal.video import TIMESTAMP_METHOD, VideoError, VideoFrame, VideoMetadata, VideoReader, iter_frames
 
 __all__ = [
@@ -14,6 +19,7 @@ __all__ = [
     "PersonDetection",
     "PersonDetector",
     "PersonTracker",
+    "RejectAndSplitPersonTracker",
     "TorchvisionPersonDetector",
     "TrackedDetection",
     "VideoError",
