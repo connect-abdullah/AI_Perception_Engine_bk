@@ -52,6 +52,8 @@ class Observation(Base):
         ),
         # Supports "all observations for track T in time window [a, b]".
         sa.Index("ix_observations_track_ts", "track_id", "timestamp"),
+        # Supports "who was in room R between T1 and T2".
+        sa.Index("ix_observations_room_ts", "room_id", "timestamp"),
     )
 
     # ── Columns ───────────────────────────────────────────────────────────────
@@ -77,6 +79,21 @@ class Observation(Base):
     activity_confidence: Mapped[Optional[float]] = mapped_column(
         sa.Float, nullable=True
     )
+    # Optional world / floor-plan position – filled only when the spatial layer
+    # can compute it (see migration b7e1c0d2f3a4).
+    world_x: Mapped[Optional[float]] = mapped_column(sa.Float, nullable=True)
+    world_y: Mapped[Optional[float]] = mapped_column(sa.Float, nullable=True)
+    world_z: Mapped[Optional[float]] = mapped_column(sa.Float, nullable=True)
+    room_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        sa.Uuid(as_uuid=True),
+        sa.ForeignKey("rooms.id", ondelete="SET NULL", name="fk_observations_room"),
+        nullable=True,
+    )
+
+    # Relative path of the crop PNG saved by the perception producer, matching
+    # crop_path in observations.jsonl.  Nullable: observations that have no
+    # crop (e.g. activity-only records) are valid without it.
+    crop_path: Mapped[Optional[str]] = mapped_column(sa.Text, nullable=True)
 
     # ── Relationships ─────────────────────────────────────────────────────────
     track: Mapped["Track"] = relationship("Track", back_populates="observations")

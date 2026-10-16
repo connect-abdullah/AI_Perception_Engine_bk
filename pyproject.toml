@@ -3,7 +3,7 @@ name = "ai-perception-engine"
 version = "0.1.0"
 description = "AI Perception Engine – PostgreSQL schema, SQLAlchemy models, and FastAPI health layer"
 authors = []
-packages = [{ include = "app" }]
+packages = [{ include = "app" }, { include = "reid" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
