@@ -54,6 +54,9 @@ REJECT_AND_SPLIT_SETTINGS = {
     "min_correlation": 0.45,
     "ema_alpha": 0.35,
     "min_crop_side": 4,
+    "min_chroma_pixels": 32,
+    "min_saturation": 25,
+    "min_value": 25,
 }
 
 _UNLINKED = 1e6  # assignment cost for a track/detection pair that cannot be the matched pair
@@ -210,9 +213,9 @@ def hsv_histogram(
     s_bins: int = REJECT_AND_SPLIT_SETTINGS["hist_s_bins"],
     v_bins: int = REJECT_AND_SPLIT_SETTINGS["hist_v_bins"],
     min_crop_side: int = REJECT_AND_SPLIT_SETTINGS["min_crop_side"],
-    min_chroma_pixels: int = 32,
-    min_saturation: int = 25,
-    min_value: int = 25,
+    min_chroma_pixels: int = REJECT_AND_SPLIT_SETTINGS["min_chroma_pixels"],
+    min_saturation: int = REJECT_AND_SPLIT_SETTINGS["min_saturation"],
+    min_value: int = REJECT_AND_SPLIT_SETTINGS["min_value"],
 ) -> np.ndarray | None:
     """L1-normalised HSV histogram of chromatic pixels in the detector crop.
 

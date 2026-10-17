@@ -221,8 +221,10 @@ AI query layer       (not built yet)
 ```
 
 The database models in `app/` already have places for this data (`tracks.person_id`,
-`observations`, `persons.person_code`, `events`), but **nothing yet writes ReID or
-perception results into the database**, and **the AI query layer does not exist yet**.
+`observations`, `persons.person_code`, `events`). HTTP ingest routes can write
+perception observations and activity/event payloads into the database, but there is
+**no automatic disk→DB bridge** from perception run folders, **no ReID file consumer**
+of the handoff contract, and **the AI query layer does not exist yet**.
 
 Example questions this should eventually answer:
 
@@ -239,8 +241,9 @@ Example questions this should eventually answer:
 
 - video ingestion (frame numbers, timestamps, frame skipping)
 - person detection (pretrained Faster R-CNN, person class only)
-- local tracking (ByteTrack)
-- structured output (manifest, observations, crops)
+- local tracking (ByteTrack + experimental HSV reject-and-split gate)
+- structured output (manifest, observations, crops; handoff contract v1 stable)
+- HTTP ingest for observations / activity / events (sink ready; event producer not wired)
 - crop embeddings (pretrained OSNet)
 - tracklet aggregation
 - anonymous identity registry and candidate ranking
@@ -259,8 +262,8 @@ behaves as designed, not that it recognises real people well.
 - **Real camera transition timings**: no measured walking times between cameras.
 - **Final production model licensing**: the current detector (COCO) and ReID (MSMT17-trained OSNet) weights are for development only and are not cleared for commercial use.
 - **End-to-end Person 2 → ReID consumer**: nothing yet reads the handoff files and runs ReID on them.
-- **Backend integration**: no results are written to the database.
-- **Activity recognition and entry/exit events**: not implemented.
+- **Backend integration**: ingest API exists; automatic write from perception run dirs is not.
+- **Activity recognition and entry/exit events**: detection producer not implemented (ingest sink exists).
 - **AI query validation**: no query layer exists.
 - **Persistence of identities**: the identity registry lives in memory only.
 - **Optional face / gait recognition**: not implemented.

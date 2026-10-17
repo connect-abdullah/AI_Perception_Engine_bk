@@ -1,10 +1,27 @@
 # Perception → ReID handoff contract
 
-Status: draft, `contract_version` `"1"`. This document is the boundary between any
-perception producer (video → detection → local tracking → crops) and the ReID consumer.
-It does not depend on any particular producer's code. A producer is compliant if its
-output follows this document; the consumer reads only this output and must not depend
-on, or branch on, which producer wrote it.
+Status: **stable** for `contract_version` `"1"`. Field names and meanings below are
+frozen for this version; a breaking change requires a new `contract_version`.
+This document is the boundary between any perception producer (video → detection →
+local tracking → crops) and the ReID consumer. It does not depend on any particular
+producer's code. A producer is compliant if its output follows this document; the
+consumer reads only this output and must not depend on, or branch on, which producer
+wrote it.
+
+### Field map (task checklist → contract names)
+
+| Checklist name | Contract name | Where |
+|---|---|---|
+| `source_video_id` | `source_video_id` | manifest + every observation |
+| `camera_code` | `camera_code` | **manifest only** (not duplicated on observation lines) |
+| `local_track_id` | `local_track_id` | observation + track summary |
+| `frame_number` | `frame_number` | observation (0-based source frames) |
+| `timestamp` | **`timestamp_seconds`** | observation (float, seconds from video start) |
+| `bbox` | `bbox` as `[x, y, width, height]` ints | observation |
+| `confidence` | **`detection_confidence`** | observation |
+| `crop_path` | `crop_path` (string or `null`) | observation |
+
+Do not add duplicate observation fields merely to match alternate checklist names.
 
 ## Layout
 

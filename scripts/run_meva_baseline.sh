@@ -1,14 +1,28 @@
 #!/usr/bin/env bash
-# Sequential MEVA baseline re-run with visible progress.
-# Usage: bash scripts/run_meva_baseline.sh
+# Sequential MEVA re-run with visible progress.
+# Usage:
+#   bash scripts/run_meva_baseline.sh
+#   TRACKER=bytetrack OUT_ROOT=perception_runs/meva_baseline_rerun bash scripts/run_meva_baseline.sh
+#   TRACKER=reject_and_split OUT_ROOT=perception_runs/meva_reject_and_split_checkpoint bash scripts/run_meva_baseline.sh
+#
+# TRACKER: reject_and_split (default) | bytetrack
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 VENV="${VENV:-/private/var/folders/4f/57tj8gl55_7139f56dw52qr40000gn/T/cursor-sandbox-cache/e94cf220e2bf98de6cc1b9d37cab4b10/poetry/virtualenvs/ai-perception-engine-sTO6kafp-py3.14}"
 PY="${VENV}/bin/python"
 OUT_ROOT="${OUT_ROOT:-perception_runs/meva_reject_and_split}"
+TRACKER="${TRACKER:-reject_and_split}"
+case "${TRACKER}" in
+  reject_and_split|bytetrack) ;;
+  *)
+    echo "TRACKER must be reject_and_split or bytetrack, got: ${TRACKER}" >&2
+    exit 1
+    ;;
+esac
 mkdir -p "$OUT_ROOT"
 echo "OUT_ROOT=${OUT_ROOT}"
+echo "TRACKER=${TRACKER}"
 
 run_one() {
   local cam="$1" video="$2" sid="$3"
@@ -17,13 +31,14 @@ run_one() {
   echo "START ${cam}  $(date '+%H:%M:%S')"
   echo "  video: ${video}"
   echo "  out:   ${out}"
+  echo "  tracker: ${TRACKER}"
   echo "============================================================"
   rm -rf "$out"
-  PYTHONUNBUFFERED=1 "$PY" -u - <<PY
-import sys, time
+  TRACKER_MODE="${TRACKER}" PYTHONUNBUFFERED=1 "$PY" -u - <<PY
+import os, sys, time
 from pathlib import Path
 from perception_minimal.detector import TorchvisionPersonDetector
-from perception_minimal.tracker import RejectAndSplitPersonTracker
+from perception_minimal.tracker import ByteTrackPersonTracker, RejectAndSplitPersonTracker
 from perception_minimal.video import VideoReader
 from perception_minimal.export import RunWriter, prepare_output_dir
 
@@ -31,6 +46,7 @@ cam = "${cam}"
 video = "${video}"
 out = Path("${out}")
 sid = "${sid}"
+mode = os.environ["TRACKER_MODE"]
 STRIDE, CROP_EVERY, THRESH = 10, 3, 0.5
 
 print(f"[{cam}] loading detector...", flush=True)
@@ -43,9 +59,17 @@ with VideoReader(video) as vr:
     approx = (total // STRIDE) if total else "?"
     print(f"[{cam}] {vr.metadata.width}x{vr.metadata.height} @ {vr.metadata.fps}fps  "
           f"frames≈{total}  processed≈{approx}", flush=True)
-    tracker = RejectAndSplitPersonTracker(vr.metadata.fps / STRIDE)
-    print(f"[{cam}] tracker={tracker.config['tracker']} gate={tracker.config['gate']} "
-          f"min_corr={tracker.config['min_correlation']}", flush=True)
+    frame_rate = vr.metadata.fps / STRIDE
+    if mode == "bytetrack":
+        tracker = ByteTrackPersonTracker(frame_rate)
+        gate = None
+        min_corr = None
+    else:
+        tracker = RejectAndSplitPersonTracker(frame_rate)
+        gate = tracker.config.get("gate")
+        min_corr = tracker.config.get("min_correlation")
+    print(f"[{cam}] tracker={tracker.config.get('tracker', type(tracker).__name__)} "
+          f"gate={gate} min_corr={min_corr}", flush=True)
     prepare_output_dir(out, overwrite=True)
     with RunWriter(out, source_video_id=sid, crop_every=CROP_EVERY, overwrite=True) as writer:
         n = 0
@@ -79,10 +103,12 @@ with VideoReader(video) as vr:
                 "tracker_frame_rate": vr.metadata.fps / STRIDE,
                 "processed_frames": n,
                 "last_processed_frame_number": frame.frame_number,
+                "tracker_mode": mode,
             },
             "producer": {
                 "name": "perception_minimal",
                 "score_threshold": THRESH,
+                "tracker": tracker.config,
             },
         })
 elapsed = time.time() - t0
@@ -106,3 +132,4 @@ run_one G299 \
 
 echo "ALL DONE $(date '+%H:%M:%S')"
 echo "Outputs: ${OUT_ROOT}/G330  and  ${OUT_ROOT}/G299"
+echo "TRACKER=${TRACKER}"

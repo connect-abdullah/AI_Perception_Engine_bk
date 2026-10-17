@@ -147,3 +147,91 @@ def test_default_pipeline_factory_is_reject_and_split():
 
     default = inspect.signature(run_pipeline).parameters["tracker_factory"].default
     assert default is RejectAndSplitPersonTracker
+
+
+def test_settings_expose_chroma_defaults():
+    """HSV gate chroma knobs are in REJECT_AND_SPLIT_SETTINGS (not hidden function defaults)."""
+    for key in ("min_chroma_pixels", "min_saturation", "min_value"):
+        assert key in REJECT_AND_SPLIT_SETTINGS
+    tracker = RejectAndSplitPersonTracker(FPS)
+    for key in ("min_chroma_pixels", "min_saturation", "min_value"):
+        assert tracker.config[key] == REJECT_AND_SPLIT_SETTINGS[key]
+
+
+class CrossingStickyInner:
+    """Emits sticky ids \"1\" and \"2\" for up to two detections (simulates crossed associations)."""
+
+    def __init__(self, frame_rate: float = FPS):
+        self.frame_rate = frame_rate
+        self.config = {"tracker": "CrossingStickyInner", "frame_rate": frame_rate}
+
+    def reset(self) -> None:
+        pass
+
+    def update(self, detections, frame_bgr=None):
+        del frame_bgr
+        out = []
+        for i, d in enumerate(detections[:2]):
+            out.append(TrackedDetection(str(i + 1), d.bbox, d.score))
+        return out
+
+
+def test_crossing_different_colors_splits_swapped_association():
+    """Two people cross: inner keeps id \"1\" on the wrong body (color change) → local split."""
+    tracker = RejectAndSplitPersonTracker(FPS, inner=CrossingStickyInner(), min_correlation=0.45)
+    # Person A (green) at left, person B (blue) at right — establish signatures on ids 1 and 2.
+    left, right = (20, 30, 40, 60), (100, 30, 40, 60)
+    for _ in range(4):
+        frame = paint(200, 120, [(left, (40, 180, 40)), (right, (255, 40, 40))])
+        out = tracker.update(
+            [PersonDetection(left, 0.9), PersonDetection(right, 0.9)],
+            frame,
+        )
+        assert {t.local_track_id for t in out} == {"1", "2"}
+
+    # CrossingStickyInner maps detections[0]→\"1\", detections[1]→\"2\".
+    # Feed blue first so sticky \"1\" (established on green) gets the wrong body → split.
+    blue_box, green_box = (100, 30, 40, 60), (20, 30, 40, 60)
+    frame = paint(200, 120, [(blue_box, (255, 40, 40)), (green_box, (40, 180, 40))])
+    out = tracker.update(
+        [PersonDetection(blue_box, 0.9), PersonDetection(green_box, 0.9)],
+        frame,
+    )
+    ids = {t.local_track_id for t in out}
+    assert len(ids) == 2
+    # Both sticky ids saw a clothing change → new local ids beyond \"1\"/\"2\".
+    assert any(int(i) > 2 for i in ids)
+    assert "1" not in ids  # original green signature abandoned for sticky bt id 1
+
+
+def test_crossing_same_color_stable_control_keeps_ids():
+    """Same clothing color on both people: gate must not invent splits (stable control)."""
+    tracker = RejectAndSplitPersonTracker(FPS, inner=CrossingStickyInner(), min_correlation=0.45)
+    left, right = (20, 30, 40, 60), (100, 30, 40, 60)
+    color = (40, 180, 40)
+    for _ in range(6):
+        frame = paint(200, 120, [(left, color), (right, color)])
+        out = tracker.update(
+            [PersonDetection(left, 0.9), PersonDetection(right, 0.9)],
+            frame,
+        )
+        assert {t.local_track_id for t in out} == {"1", "2"}
+
+
+def test_chain_track_three_appearance_changes_split_each_time():
+    """One sticky inner id through three clothing changes → three local splits (chain proxy)."""
+    tracker = RejectAndSplitPersonTracker(FPS, inner=StickyInner(), min_correlation=0.45)
+    bbox = (20, 30, 40, 60)
+    colors = [(40, 180, 40), (255, 40, 40), (40, 40, 255)]  # green, blue, red
+    local_ids = []
+    for color in colors:
+        for _ in range(4):
+            frame = paint(200, 120, [(bbox, color)])
+            out = tracker.update([PersonDetection(bbox, 0.9)], frame)
+            assert len(out) == 1
+            local_ids.append(out[0].local_track_id)
+    # Each clothing segment should use a distinct local id: 1, then 2, then 3.
+    assert local_ids[0] == "1"
+    assert local_ids[4] == "2"
+    assert local_ids[8] == "3"
+    assert set(local_ids) == {"1", "2", "3"}
