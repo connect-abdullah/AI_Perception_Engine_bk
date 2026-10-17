@@ -1,5 +1,6 @@
 from typing import Any
 
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 
@@ -7,7 +8,8 @@ def ok(data: Any = None, message: str = "success", status_code: int = 200) -> JS
     """Return a standard success envelope."""
     return JSONResponse(
         status_code=status_code,
-        content={"ok": True, "message": message, "data": data},
+        # jsonable_encoder: payloads contain datetimes/UUIDs, which plain JSON cannot encode.
+        content=jsonable_encoder({"ok": True, "message": message, "data": data}),
     )
 
 
@@ -17,5 +19,5 @@ def fail(
     """Return a standard error envelope."""
     return JSONResponse(
         status_code=status_code,
-        content={"ok": False, "message": message, "data": data},
+        content=jsonable_encoder({"ok": False, "message": message, "data": data}),
     )
