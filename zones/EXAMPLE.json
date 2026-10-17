@@ -1,0 +1,8 @@
+{
+  "camera_code": "CAM-LOBBY-01",
+  "frame_size": [1920, 1080],
+  "zones": [
+    {"name": "main_door", "polygon": [[860, 300], [1060, 300], [1060, 700], [860, 700]], "dwell_seconds": 10},
+    {"name": "sofa", "polygon": [[200, 600], [700, 600], [700, 1000], [200, 1000]], "dwell_seconds": 30}
+  ]
+}
